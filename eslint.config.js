@@ -10,4 +10,11 @@ export default defineConfig([
   },
   tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
+
+  // Aqui você sobrepõe ou ajusta regras específicas
+  {
+    rules: {
+      'react/react-in-jsx-scope': 'off',
+    },
+  },
 ])
