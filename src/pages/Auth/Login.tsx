@@ -1,17 +1,21 @@
 import { useState, type FormEvent } from 'react'
 import Input from '../../components/PasswordInput.tsx'
 import { regex } from 'regex'
+import axiosInstance from '../../api/axiosInstance.ts'
+import { useNavigate } from 'react-router'
 
 const Login = () => {
   const [password, setPassword] = useState<string>('')
   const [email, setEmail] = useState<string>('')
   const [error, setError] = useState<null | string>(null)
 
+  const navigate = useNavigate()
+
   const emailRegex = regex`
   ^ [^\s@]+ @ [^\s@]+\.[^\s@]+ $
 `
 
-  const handleLogin = (e: FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault()
 
     if (!emailRegex.test(email)) {
@@ -21,6 +25,25 @@ const Login = () => {
 
     if (!password) {
       setError('Informe a senha.')
+      return
+    }
+
+    setError('')
+
+    try {
+      const res = await axiosInstance.post('/login', { email, password })
+      if (res.data && res.data.accessToken) {
+        console.log('caiu aqui')
+        localStorage.setItem('cm:token', res.data.accessToken)
+        navigate('/home')
+      }
+    } catch (error: any) {
+      if (error.response) {
+        console.log(email, password, '@@@@@@@@@@@')
+        console.log('Erro de validação:', error.response.data)
+      } else {
+        console.log('Erro inesperado:', error.message)
+      }
     }
   }
 
@@ -56,7 +79,11 @@ const Login = () => {
               placeholder="Senha"
             />
 
-            <button type="submit" className="btn-primary">
+            <button
+              type="submit"
+              className="btn-primary"
+              onSubmit={handleLogin}
+            >
               Login
             </button>
             {error && <p style={{ color: 'red' }}>{error}</p>}
