@@ -1,4 +1,29 @@
+import { useState, type FormEvent } from 'react'
+import Input from '../../components/PasswordInput.tsx'
+import { regex } from 'regex'
+
 const Login = () => {
+  const [password, setPassword] = useState<string>('')
+  const [email, setEmail] = useState<string>('')
+  const [error, setError] = useState<null | string>(null)
+
+  const emailRegex = regex`
+  ^ [^\s@]+ @ [^\s@]+\.[^\s@]+ $
+`
+
+  const handleLogin = (e: FormEvent) => {
+    e.preventDefault()
+
+    if (!emailRegex.test(email)) {
+      setError('Email inválido.')
+      return
+    }
+
+    if (!password) {
+      setError('Informe a senha.')
+    }
+  }
+
   return (
     <main className="relative h-screen overflow-hidden bg-violet-50">
       <aside className="login-ui-box right-1/2 -bottom-40 z-0 bg-violet-200" />
@@ -14,15 +39,27 @@ const Login = () => {
           </p>
         </section>
         <section className="relative h-[75vh] w-2/4 rounded-r-lg bg-white p-16 shadow-lg shadow-violet-200/20">
-          <form>
+          <form onSubmit={handleLogin}>
             <h4 className="mb-7 text-2xl font-semibold">Login</h4>
-            <input type="text" placeholder="E-mail" className="input-box" />
+            <input
+              type="text"
+              placeholder="E-mail"
+              className="input-box"
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
-            <input type="text" placeholder="Senha" className="input-box" />
+            <Input
+              value={password}
+              onChange={({ target }) => {
+                setPassword(target.value)
+              }}
+              placeholder="Senha"
+            />
 
             <button type="submit" className="btn-primary">
               Login
             </button>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
 
             <p className="my-4 text-center text-xs text-slate-500">ou</p>
 
