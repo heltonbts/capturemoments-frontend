@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa'
+import { useLocation } from 'react-router'
 
 interface InputProps {
   value: string
@@ -9,11 +10,14 @@ interface InputProps {
 
 const Input = ({ value, onChange, placeholder }: InputProps) => {
   const [isShowPassword, setIsShowPassword] = useState(false)
+  const location = useLocation()
 
   const togglesShowPassword = () => {
     setIsShowPassword(!isShowPassword)
   }
 
+  const iconColor =
+    location.pathname === '/login' ? 'text-primary' : 'text-emerald-500'
   return (
     <div className="mb-3 flex items-center rounded bg-violet-600/5 px-5">
       <input
@@ -27,14 +31,14 @@ const Input = ({ value, onChange, placeholder }: InputProps) => {
       {isShowPassword ? (
         <FaRegEye
           size={22}
-          className="cursor-pointer text-primary"
+          className={`cursor-pointer ${iconColor}`}
           onClick={togglesShowPassword}
         />
       ) : (
         <FaRegEyeSlash
           size={22}
           onClick={togglesShowPassword}
-          className="cursor-pointer text-primary"
+          className={`cursor-pointer ${iconColor}`}
         />
       )}
     </div>
