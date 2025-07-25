@@ -3,6 +3,7 @@ import Input from '../../components/PasswordInput.tsx'
 import { regex } from 'regex'
 import axiosInstance from '../../api/axiosInstance.ts'
 import { useNavigate } from 'react-router'
+import axios from 'axios'
 
 const Login = () => {
   const [password, setPassword] = useState<string>('')
@@ -33,16 +34,21 @@ const Login = () => {
     try {
       const res = await axiosInstance.post('/login', { email, password })
       if (res.data && res.data.accessToken) {
-        console.log('caiu aqui')
         localStorage.setItem('cm:token', res.data.accessToken)
         navigate('/home')
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      if (error.response) {
-        console.log(email, password, '@@@@@@@@@@@')
-        console.log('Erro de validação:', error.response.data)
-      } else {
-        console.log('Erro inesperado:', error.message)
+      if (axios.isAxiosError(error)) {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        ) {
+          setError(error.response.data.message)
+        } else {
+          setError('Erro inesperado, tente novamente')
+        }
       }
     }
   }
@@ -90,7 +96,11 @@ const Login = () => {
 
             <p className="my-4 text-center text-xs text-slate-500">ou</p>
 
-            <button type="submit" className="btn-primary btn-light">
+            <button
+              type="submit"
+              className="btn-primary btn-light"
+              onClick={() => navigate('/signup')}
+            >
               Registra-se
             </button>
           </form>
