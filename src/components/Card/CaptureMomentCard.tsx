@@ -3,6 +3,7 @@ import { FaHeart } from 'react-icons/fa'
 import { GrMapLocation } from 'react-icons/gr'
 import axiosInstance from '../../api/axiosInstance'
 import { format } from 'date-fns'
+import { Bounce, ToastContainer, toast } from 'react-toastify'
 
 import { ptBR } from 'date-fns/locale'
 
@@ -60,6 +61,7 @@ const CaptureMomentCard: React.FC<CaptureMomentCardProps> = ({ moments }) => {
           },
         },
       )
+      toast.success('Momento atualizado')
     } catch (error) {
       setIsFavorite(currentStatus)
       console.log(error)
@@ -68,6 +70,19 @@ const CaptureMomentCard: React.FC<CaptureMomentCardProps> = ({ moments }) => {
 
   return (
     <article className="relative cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-white transition-all ease-in-out hover:shadow-lg hover:shadow-slate-200">
+      <ToastContainer
+        position="bottom-center"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+        transition={Bounce}
+      />
       <img
         src={imageUrl}
         alt={imageUrl}
