@@ -12,15 +12,16 @@ type NavbarProps = {
 
 const Navbar = ({ userInfo }: NavbarProps) => {
   if (!userInfo) {
-    return
+    return null
   }
-  const { user } = userInfo
-  console.log(user, 'filho')
+  const isToken = localStorage.getItem('cm:token')
+  const showProfileItem = isToken && userInfo
+
   return (
     <div className="sticky top-0 z-10 flex items-center justify-between bg-white px-6 py-2 drop-shadow">
       <img src={Logo} alt="logo" className="h-11" />
 
-      <ProfileInfo user={user} />
+      {showProfileItem && <ProfileInfo userInfo={userInfo} />}
     </div>
   )
 }

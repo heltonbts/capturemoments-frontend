@@ -1,15 +1,24 @@
+import { useNavigate } from 'react-router'
+import { LogOut } from 'lucide-react'
+
 interface ProfileProps {
-  user: {
-    fullName: string
+  userInfo: {
+    user: {
+      fullName: string
+    }
   }
 }
 
-const ProfileInfo = ({ user }: ProfileProps) => {
-  if (!user.fullName) {
-    return null
-  }
+const ProfileInfo = ({ userInfo }: ProfileProps) => {
+  const navigate = useNavigate()
+  const { user } = userInfo
   const nameParts = user.fullName.split(' ')
   const userName = `${nameParts[0]} ${nameParts[1] || ''}`.trim()
+
+  const handleLogout = () => {
+    localStorage.clear()
+    navigate('/login')
+  }
 
   return (
     <div className="flex items-center gap-3">
@@ -21,9 +30,12 @@ const ProfileInfo = ({ user }: ProfileProps) => {
           .join('')}
       </div>
       <div>
-        <p className="text-sm font-medium">{userName || 'Visitante'}</p>
-        <button className="text-sm text-slate-700 underline">
-          {user ? 'Sair' : 'Login'}
+        <p className="text-sm font-medium">{userName}</p>
+        <button
+          className="flex cursor-pointer items-center justify-center gap-1 text-sm text-slate-700 underline"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-5" /> Sair
         </button>
       </div>
     </div>
