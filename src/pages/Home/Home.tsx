@@ -112,7 +112,9 @@ const Home = () => {
         className="model-box"
         contentLabel="Example Modal"
       >
-        <AddEditTravel />
+        <div className="w-full overflow-x-hidden">
+          <AddEditTravel />
+        </div>
       </Modal>
     </div>
   )
