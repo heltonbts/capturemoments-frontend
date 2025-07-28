@@ -6,6 +6,7 @@ import ImageUpload from './UploadImage'
 
 const AddEditTravel = () => {
   const [visitedDate, setVisitedDate] = useState<Date>(new Date())
+  const [image, setImage] = useState<File | string | null>('')
   return (
     <section className="relative mx-auto overflow-x-hidden">
       <div className="w-full">
@@ -42,7 +43,7 @@ const AddEditTravel = () => {
               />
             </div>
             <div className="my-3">
-              <ImageUpload />
+              <ImageUpload image={image} setImage={setImage} />
             </div>
             <div className="mt-4 flex flex-col gap-2">
               <label className="input-label">Descrição</label>
