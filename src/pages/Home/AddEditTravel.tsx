@@ -2,6 +2,7 @@ import { CirclePlus } from 'lucide-react'
 import { X } from 'lucide-react'
 import DateSelector from '../../components/DateCalendar'
 import { useState } from 'react'
+import ImageUpload from './UploadImage'
 
 const AddEditTravel = () => {
   const [visitedDate, setVisitedDate] = useState<Date>(new Date())
@@ -40,7 +41,9 @@ const AddEditTravel = () => {
                 setVisitedDate={setVisitedDate}
               />
             </div>
-            <div className="my-3">Seletor de Imagem</div>
+            <div className="my-3">
+              <ImageUpload />
+            </div>
             <div className="mt-4 flex flex-col gap-2">
               <label className="input-label">Descrição</label>
               <textarea
