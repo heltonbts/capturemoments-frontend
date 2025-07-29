@@ -113,7 +113,13 @@ const Home = () => {
         contentLabel="Example Modal"
       >
         <div className="w-full overflow-x-hidden">
-          <AddEditTravel />
+          <AddEditTravel
+            type={openEditModal.type}
+            onClose={() => {
+              setOpenEditModal({ isShow: false, data: null, type: 'add' })
+            }}
+            GetAllMoments={() => {}}
+          />
         </div>
       </Modal>
     </div>
