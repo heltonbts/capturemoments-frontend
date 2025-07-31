@@ -72,9 +72,16 @@ const Home = () => {
             {userMoments.length > 0 ? (
               <div className="grid grid-cols-2 gap-4">
                 {userMoments
-                  .sort(
-                    (a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0),
-                  )
+                  .sort((a, b) => {
+                    if (a.isFavorite !== b.isFavorite) {
+                      return b.isFavorite ? 1 : -1
+                    }
+
+                    return (
+                      new Date(b.visitedDate).getTime() -
+                      new Date(a.visitedDate).getTime()
+                    )
+                  })
                   .map((moments) => (
                     <CaptureMomentCard key={moments.id} moments={moments} />
                   ))}
@@ -118,7 +125,7 @@ const Home = () => {
             onClose={() => {
               setOpenEditModal({ isShow: false, data: null, type: 'add' })
             }}
-            GetAllMoments={() => {}}
+            getAllMoments={getAllMoment}
           />
         </div>
       </Modal>

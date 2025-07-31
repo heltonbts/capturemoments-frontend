@@ -1,17 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CirclePlus } from 'lucide-react'
 import { X } from 'lucide-react'
 import DateSelector from '../../components/DateCalendar'
 import { useState } from 'react'
 import ImageUpload from './UploadImage'
 import TagInput from '../../components/TagInput'
+import { uploadImage } from '../../utils/uploadimage'
+import axiosInstance from '../../api/axiosInstance'
+import { toast } from 'react-toastify'
+import axios from 'axios'
 
 interface props {
   type: string
   onClose: () => void
-  GetAllMoments: () => void
+  getAllMoments: () => void
 }
 
-const AddEditTravel = ({ type, onClose, GetAllMoments }: props) => {
+const AddEditTravel = ({ type, onClose, getAllMoments }: props) => {
   const [visitedDate, setVisitedDate] = useState<Date>(new Date())
   const [image, setImage] = useState<File | string | null>('')
   const [title, setTitle] = useState<string>('')
@@ -19,10 +24,49 @@ const AddEditTravel = ({ type, onClose, GetAllMoments }: props) => {
   const [tag, setTag] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
 
-  const addNewCapturedMoment = () => {}
+  const addNewCapturedMoment = async () => {
+    try {
+      let imageUrl = ''
+
+      if (image && typeof image !== 'string') {
+        const imageResponse = await uploadImage(image)
+        imageUrl = imageResponse
+        console.log(imageUrl, '@@@@@@@@@@')
+      }
+
+      const timeStamp = visitedDate.getTime()
+
+      const res = await axiosInstance.post('add-register', {
+        title,
+        story: description,
+        visitedLocation: tag,
+        imageUrl: imageUrl,
+        visitedDate: timeStamp,
+      })
+      console.log(imageUrl, '@@@@@@@@@@@@@@@@@@@@@@@')
+
+      if (res.data) {
+        toast.success('Momento Adicionado com Sucesso!')
+        getAllMoments()
+        onClose()
+      }
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        ) {
+          setError(error.response.data.message)
+        } else {
+          console.log('Erro inesperado, tente novamente', error)
+        }
+      }
+    }
+  }
 
   const updateCapturedMoment = () => {
-    GetAllMoments()
+    getAllMoments()
   }
 
   const handleSubmitMoment = () => {

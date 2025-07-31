@@ -25,15 +25,18 @@ const DateSelector = ({ visitedDate }: DateSelectorProps) => {
         onClick={handleOpenCalendar}
       >
         <MdOutlineDateRange className="text-lg" />
-        {viewCalendar
-          ? selected
-            ? format(selected, 'do MMM yyyy', { locale: ptBR })
-            : 'Selecione uma data'
-          : format(visitedDate, 'do MMM yyyy', { locale: ptBR })}
+        {selected
+          ? format(selected, 'do MMM yyyy', { locale: ptBR })
+          : visitedDate
+            ? format(new Date(visitedDate), 'do MMM yyyy', { locale: ptBR })
+            : 'Selecione uma data'}
       </button>
       {viewCalendar ? (
         <div className="relative h-[400px] overflow-y-scroll rounded-lg bg-purple-50/80 p-5 pt-9">
-          <button className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 hover:bg-purple-300">
+          <button
+            onClick={handleOpenCalendar}
+            className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 hover:bg-purple-300"
+          >
             <MdClose className="text-xl text-purple-600" />
           </button>
           <DayPicker
