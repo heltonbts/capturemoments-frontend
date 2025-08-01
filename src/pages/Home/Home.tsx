@@ -96,7 +96,11 @@ const Home = () => {
 
   const handleEditClick = () => {
     setViewModal((prevState) => ({ ...prevState, isShow: false }))
-    setOpenEditModal((prevState) => ({ ...prevState, isShow: true }))
+    setOpenEditModal((prevState) => ({
+      ...prevState,
+      type: 'edit',
+      isShow: true,
+    }))
   }
 
   useEffect(() => {

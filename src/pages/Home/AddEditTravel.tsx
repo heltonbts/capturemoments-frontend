@@ -9,14 +9,33 @@ import { uploadImage } from '../../utils/uploadimage'
 import axiosInstance from '../../api/axiosInstance'
 import { toast } from 'react-toastify'
 import axios from 'axios'
+import { MdUpdate } from 'react-icons/md'
+
+interface Moments {
+  id: string
+  title: string
+  story: string
+  visitedLocation: string[]
+  isFavorite: boolean
+  userId: string
+  createdOn: string
+  imageUrl: string
+  visitedDate: string
+}
 
 interface props {
   type: string
   onClose: () => void
   getAllMoments: () => void
+  momentInfo: Moments | null
 }
 
-const AddEditTravel = ({ type, onClose, getAllMoments }: props) => {
+const AddEditTravel = ({ type, onClose, getAllMoments, momentInfo }: props) => {
+  if (!momentInfo) {
+    ;<p>Carregando Informações</p>
+    return
+  }
+
   const [visitedDate, setVisitedDate] = useState<Date>(new Date())
   const [image, setImage] = useState<File | string | null>('')
   const [title, setTitle] = useState<string>('')
@@ -65,8 +84,41 @@ const AddEditTravel = ({ type, onClose, getAllMoments }: props) => {
     }
   }
 
-  const updateCapturedMoment = () => {
-    getAllMoments()
+  const updateCapturedMoment = async () => {
+    // try {
+    //   let imageUrl = ''
+    //   if (image && typeof image !== 'string') {
+    //     const imageResponse = await uploadImage(image)
+    //     imageUrl = imageResponse
+    //     console.log(imageUrl, '@@@@@@@@@@')
+    //   }
+    //   const timeStamp = visitedDate.getTime()
+    //   const res = await axiosInstance.post('edit-moment', {
+    //     title,
+    //     story: description,
+    //     visitedLocation: tag,
+    //     imageUrl: imageUrl,
+    //     visitedDate: timeStamp,
+    //   })
+    //   console.log(imageUrl, '@@@@@@@@@@@@@@@@@@@@@@@')
+    //   if (res.data) {
+    //     toast.success('Atualizado com Sucesso')
+    //     getAllMoments()
+    //     onClose()
+    //   }
+    // } catch (error: any) {
+    //   if (axios.isAxiosError(error)) {
+    //     if (
+    //       error.response &&
+    //       error.response.data &&
+    //       error.response.data.message
+    //     ) {
+    //       setError(error.response.data.message)
+    //     } else {
+    //       console.log('Erro inesperado, tente novamente', error)
+    //     }
+    //   }
+    // }
   }
 
   const handleSubmitMoment = () => {
@@ -96,13 +148,19 @@ const AddEditTravel = ({ type, onClose, getAllMoments }: props) => {
       <div className="w-full">
         <header className="flex items-center justify-between">
           <h2 className="text-xl font-medium text-slate-700">
-            Adicionar Momento
+            {type === 'add' ? 'Adicionar Momento' : 'Editar Momento'}
           </h2>
           <div>
             <div className="flex items-center gap-3 rounded-l-lg bg-violet-50/50 p-2">
-              <button className="btn-small" onClick={handleSubmitMoment}>
-                <CirclePlus /> Adicionar Momento
-              </button>
+              {type === 'add' ? (
+                <button className="btn-small" onClick={handleSubmitMoment}>
+                  <CirclePlus /> Adicionar Momento
+                </button>
+              ) : (
+                <button className="btn-small" onClick={handleSubmitMoment}>
+                  <MdUpdate /> Atualizar Momento
+                </button>
+              )}
 
               <button onClick={onClose}>
                 <X className="text-slate-400" />
