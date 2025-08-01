@@ -7,6 +7,8 @@ import CaptureMomentCard from '../../components/Card/CaptureMomentCard'
 import { CirclePlus } from 'lucide-react'
 import Modal from 'react-modal'
 import AddEditTravel from './AddEditTravel'
+import ViewTravel from './ViewTravelMoment'
+import { toast } from 'react-toastify'
 
 interface Moments {
   id: string
@@ -24,6 +26,16 @@ const Home = () => {
   const [userInfo, setUserInfo] = useState(null)
   const [userMoments, setUserMoments] = useState<Moments[]>([])
   const [openEditModal, setOpenEditModal] = useState({
+    isShow: false,
+    type: 'add',
+    data: null,
+  })
+
+  const [openViewModal, setViewModal] = useState<{
+    isShow: boolean
+    type: string
+    data: Moments | null
+  }>({
     isShow: false,
     type: 'add',
     data: null,
@@ -58,6 +70,35 @@ const Home = () => {
     }
   }
 
+  const handleViewStory = (moment: Moments) => {
+    setViewModal({
+      isShow: true,
+      type: 'view',
+      data: moment,
+    })
+  }
+
+  const handleDeleteMoment = async (id: string) => {
+    const token = localStorage.getItem('cm:token')
+    try {
+      await axiosInstance.delete(`/delete-moment/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      await getAllMoment()
+      setViewModal((prevState) => ({ ...prevState, isShow: false }))
+      toast.error('Momento apagado com sucesso.')
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const handleEditClick = () => {
+    setViewModal((prevState) => ({ ...prevState, isShow: false }))
+    setOpenEditModal((prevState) => ({ ...prevState, isShow: true }))
+  }
+
   useEffect(() => {
     getAllMoment()
     getUserInfo()
@@ -83,7 +124,11 @@ const Home = () => {
                     )
                   })
                   .map((moments) => (
-                    <CaptureMomentCard key={moments.id} moments={moments} />
+                    <CaptureMomentCard
+                      key={moments.id}
+                      moments={moments}
+                      handleViewStory={() => handleViewStory(moments)}
+                    />
                   ))}
               </div>
             ) : (
@@ -126,6 +171,31 @@ const Home = () => {
               setOpenEditModal({ isShow: false, data: null, type: 'add' })
             }}
             getAllMoments={getAllMoment}
+          />
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={openViewModal.isShow}
+        onRequestClose={() => {}}
+        style={{
+          overlay: {
+            backgroundColor: 'rgba(0,0,0,0.2)',
+            zIndex: 999,
+          },
+        }}
+        ariaHideApp={false}
+        className="model-box"
+        contentLabel="Example Modal"
+      >
+        <div className="w-full overflow-x-hidden">
+          <ViewTravel
+            moment={openViewModal.data}
+            onClose={() => {
+              setViewModal((prevState) => ({ ...prevState, isShow: false }))
+            }}
+            onEditClick={handleEditClick}
+            onHandleDelete={handleDeleteMoment}
           />
         </div>
       </Modal>

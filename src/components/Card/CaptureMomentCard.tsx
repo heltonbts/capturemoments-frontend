@@ -21,9 +21,13 @@ interface Moment {
 
 interface CaptureMomentCardProps {
   moments: Moment
+  handleViewStory: () => void
 }
 
-const CaptureMomentCard: React.FC<CaptureMomentCardProps> = ({ moments }) => {
+const CaptureMomentCard: React.FC<CaptureMomentCardProps> = ({
+  moments,
+  handleViewStory,
+}) => {
   const {
     title,
     story,
@@ -87,6 +91,7 @@ const CaptureMomentCard: React.FC<CaptureMomentCardProps> = ({ moments }) => {
         src={imageUrl}
         alt={imageUrl}
         className="h-56 w-full rounded-lg object-cover"
+        onClick={handleViewStory}
       />
       <button
         className="absolute top-4 right-4 flex h-12 w-12 items-center justify-center rounded-lg border-white/30 bg-white/40"
