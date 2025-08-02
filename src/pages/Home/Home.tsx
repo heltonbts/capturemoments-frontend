@@ -9,6 +9,10 @@ import Modal from 'react-modal'
 import AddEditTravel from './AddEditTravel'
 import ViewTravel from './ViewTravelMoment'
 import { toast } from 'react-toastify'
+import DateFilter from '../../components/DateFilter'
+import type { DateRange } from 'react-day-picker'
+import EmptyCard from '../../components/Card/EmptyCard'
+import imgError from '../../assets/images.png'
 
 interface Moments {
   id: string
@@ -40,6 +44,45 @@ const Home = () => {
     type: 'add',
     data: null,
   })
+
+  const [dateRange, setDateRange] = useState<DateRange | undefined>()
+
+  const filterMomentByDate = async (newSelected: DateRange | undefined) => {
+    try {
+      const startDate = newSelected?.from
+        ? new Date(newSelected.from).getTime()
+        : null
+      const endDate = newSelected?.to
+        ? new Date(newSelected.to).getTime()
+        : null
+      const token = localStorage.getItem('cm:token')
+
+      if (startDate && endDate && token) {
+        const res = await axiosInstance.get('/get-allmoments/filter', {
+          params: {
+            startDate,
+            endDate,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (res.data) {
+          toast.success('filtro aplicado com sucesso')
+          setUserMoments(res.data)
+        }
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const handleDaySelected = (newSelected: DateRange | undefined) => {
+    setDateRange(newSelected)
+    filterMomentByDate(newSelected)
+  }
+
   const navigate = useNavigate()
 
   const getUserInfo = async () => {
@@ -136,10 +179,18 @@ const Home = () => {
                   ))}
               </div>
             ) : (
-              'Sem Momentos Registrados'
+              <EmptyCard
+                message="Nenhum registro encontrado.
+Para começar, toque no botão “+” para cadastrar um novo item."
+                imgSrc={imgError}
+              />
             )}
           </section>
           <aside className="w-[320px]" />
+          <DateFilter
+            dateRange={dateRange}
+            handleDaySelected={handleDaySelected}
+          />
         </div>
       </main>
       <button
