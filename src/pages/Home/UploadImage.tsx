@@ -11,9 +11,14 @@ import { MdDeleteOutline } from 'react-icons/md'
 interface ImageSelectorProps {
   image: string | File | null
   setImage: Dispatch<SetStateAction<File | string | null>>
+  onDeleteImage: () => void
 }
 
-const ImageUpload = ({ image, setImage }: ImageSelectorProps) => {
+const ImageUpload = ({
+  image,
+  setImage,
+  onDeleteImage,
+}: ImageSelectorProps) => {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [previewUrl, setPreviewUrl] = useState('')
@@ -28,6 +33,7 @@ const ImageUpload = ({ image, setImage }: ImageSelectorProps) => {
 
   function handleRemoveImage() {
     setImage(null)
+    onDeleteImage()
   }
 
   const onChangeFile = () => {

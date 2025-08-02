@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { useState, type Dispatch, type SetStateAction } from 'react'
+import { useState, useEffect, type Dispatch, type SetStateAction } from 'react'
 import { MdClose, MdOutlineDateRange } from 'react-icons/md'
 import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/style.css'
@@ -10,9 +10,22 @@ interface DateSelectorProps {
   setVisitedDate: Dispatch<SetStateAction<Date>>
 }
 
-const DateSelector = ({ visitedDate }: DateSelectorProps) => {
-  const [selected, setSelected] = useState<Date>()
+const DateSelector = ({ visitedDate, setVisitedDate }: DateSelectorProps) => {
+  const [selected, setSelected] = useState<Date>(visitedDate)
   const [viewCalendar, setViewCalendar] = useState<boolean>(false)
+
+  // Sincroniza o estado local com o prop quando ele muda
+  useEffect(() => {
+    setSelected(visitedDate)
+  }, [visitedDate])
+
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      setSelected(date)
+      setVisitedDate(date) // Comunica a mudança ao componente pai
+      setViewCalendar(false) // Fecha o calendário
+    }
+  }
 
   const handleOpenCalendar = () => {
     setViewCalendar(!viewCalendar)
@@ -25,11 +38,7 @@ const DateSelector = ({ visitedDate }: DateSelectorProps) => {
         onClick={handleOpenCalendar}
       >
         <MdOutlineDateRange className="text-lg" />
-        {selected
-          ? format(selected, 'do MMM yyyy', { locale: ptBR })
-          : visitedDate
-            ? format(new Date(visitedDate), 'do MMM yyyy', { locale: ptBR })
-            : 'Selecione uma data'}
+        {format(selected, 'do MMM yyyy', { locale: ptBR })}
       </button>
       {viewCalendar ? (
         <div className="relative h-[400px] overflow-y-scroll rounded-lg bg-purple-50/80 p-5 pt-9">
@@ -45,7 +54,7 @@ const DateSelector = ({ visitedDate }: DateSelectorProps) => {
             captionLayout="dropdown-years"
             mode="single"
             selected={selected}
-            onSelect={setSelected}
+            onSelect={handleDateSelect}
             pagedNavigation
             footer={
               selected

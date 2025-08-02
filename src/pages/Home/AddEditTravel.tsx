@@ -2,7 +2,7 @@
 import { CirclePlus } from 'lucide-react'
 import { X } from 'lucide-react'
 import DateSelector from '../../components/DateCalendar'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ImageUpload from './UploadImage'
 import TagInput from '../../components/TagInput'
 import { uploadImage } from '../../utils/uploadimage'
@@ -31,17 +31,30 @@ interface props {
 }
 
 const AddEditTravel = ({ type, onClose, getAllMoments, momentInfo }: props) => {
-  if (!momentInfo) {
-    ;<p>Carregando Informações</p>
-    return
+  if (type === 'edit') {
+    if (!momentInfo) {
+      return <p>Carregando informações</p>
+    }
   }
-
   const [visitedDate, setVisitedDate] = useState<Date>(new Date())
   const [image, setImage] = useState<File | string | null>('')
   const [title, setTitle] = useState<string>('')
   const [description, setDescription] = useState<string>('')
   const [tag, setTag] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [shouldDeleteImage, setShouldDeleteImage] = useState(false)
+
+  const initializeEditData = () => {
+    if (type === 'edit' && momentInfo) {
+      setVisitedDate(
+        momentInfo.visitedDate ? new Date(momentInfo.visitedDate) : new Date(),
+      )
+      setImage(momentInfo.imageUrl ?? '')
+      setTitle(momentInfo.title ?? '')
+      setDescription(momentInfo.story ?? '')
+      setTag(momentInfo.visitedLocation ?? [])
+    }
+  }
 
   const addNewCapturedMoment = async () => {
     try {
@@ -85,42 +98,73 @@ const AddEditTravel = ({ type, onClose, getAllMoments, momentInfo }: props) => {
   }
 
   const updateCapturedMoment = async () => {
-    // try {
-    //   let imageUrl = ''
-    //   if (image && typeof image !== 'string') {
-    //     const imageResponse = await uploadImage(image)
-    //     imageUrl = imageResponse
-    //     console.log(imageUrl, '@@@@@@@@@@')
-    //   }
-    //   const timeStamp = visitedDate.getTime()
-    //   const res = await axiosInstance.post('edit-moment', {
-    //     title,
-    //     story: description,
-    //     visitedLocation: tag,
-    //     imageUrl: imageUrl,
-    //     visitedDate: timeStamp,
-    //   })
-    //   console.log(imageUrl, '@@@@@@@@@@@@@@@@@@@@@@@')
-    //   if (res.data) {
-    //     toast.success('Atualizado com Sucesso')
-    //     getAllMoments()
-    //     onClose()
-    //   }
-    // } catch (error: any) {
-    //   if (axios.isAxiosError(error)) {
-    //     if (
-    //       error.response &&
-    //       error.response.data &&
-    //       error.response.data.message
-    //     ) {
-    //       setError(error.response.data.message)
-    //     } else {
-    //       console.log('Erro inesperado, tente novamente', error)
-    //     }
-    //   }
-    // }
-  }
+    try {
+      let imageUrl = ''
 
+      if (image && typeof image !== 'string') {
+        const imageResponse = await uploadImage(image)
+        imageUrl = imageResponse
+      } else if (
+        typeof image === 'string' &&
+        image !== '' &&
+        !shouldDeleteImage
+      ) {
+        imageUrl = image
+      }
+
+      if (shouldDeleteImage && momentInfo?.imageUrl) {
+        try {
+          await axiosInstance.delete('/delete-photo', {
+            params: {
+              imageUrl: momentInfo.imageUrl,
+            },
+          })
+        } catch (deleteError) {
+          console.log(
+            'Não foi possível deletar a imagem antiga, mas continuando...',
+            deleteError,
+          )
+        }
+      }
+
+      const timeStamp = visitedDate.getTime()
+      console.log('Enviando dados para update:', {
+        title,
+        story: description,
+        visitedLocation: tag,
+        imageUrl,
+        visitedDate: timeStamp,
+      })
+
+      if (momentInfo) {
+        const res = await axiosInstance.put(`/edit-moments/${momentInfo.id}`, {
+          title,
+          story: description,
+          visitedLocation: tag,
+          imageUrl: imageUrl,
+          visitedDate: timeStamp,
+        })
+        if (res.data) {
+          toast.success('Atualizado com Sucesso')
+          getAllMoments()
+          onClose()
+        }
+      }
+    } catch (error: any) {
+      console.log('Erro no update:', error)
+      if (axios.isAxiosError(error)) {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        ) {
+          setError(error.response.data.message)
+        } else {
+          setError('Erro inesperado, tente novamente')
+        }
+      }
+    }
+  }
   const handleSubmitMoment = () => {
     if (!title) {
       setError('Coloque o título, por favor')
@@ -130,7 +174,8 @@ const AddEditTravel = ({ type, onClose, getAllMoments, momentInfo }: props) => {
       setError('Coloque uma descrição, por favor')
       return
     }
-    if (!image) {
+
+    if (type === 'add' && !image) {
       setError('Coloque uma imagem, por favor')
       return
     }
@@ -142,6 +187,29 @@ const AddEditTravel = ({ type, onClose, getAllMoments, momentInfo }: props) => {
       addNewCapturedMoment()
     }
   }
+
+  const handleAddNewMomentClear = () => {
+    if (type === 'add') {
+      setVisitedDate(new Date())
+      setImage('')
+      setTitle('')
+      setTag([])
+      setDescription('')
+    }
+  }
+
+  const handleMomentImg = async () => {
+    setImage(null)
+    setShouldDeleteImage(true)
+  }
+
+  useEffect(() => {
+    if (type === 'add') {
+      handleAddNewMomentClear()
+    } else if (type === 'edit') {
+      initializeEditData()
+    }
+  }, [type, momentInfo])
 
   return (
     <section className="relative mx-auto overflow-x-hidden">
@@ -190,7 +258,11 @@ const AddEditTravel = ({ type, onClose, getAllMoments, momentInfo }: props) => {
               />
             </div>
             <div className="my-3">
-              <ImageUpload image={image} setImage={setImage} />
+              <ImageUpload
+                image={image}
+                setImage={setImage}
+                onDeleteImage={handleMomentImg}
+              />
             </div>
             <div className="mt-4 flex flex-col gap-2">
               <label className="input-label">Descrição</label>
@@ -205,7 +277,7 @@ const AddEditTravel = ({ type, onClose, getAllMoments, momentInfo }: props) => {
               />
             </div>
             <div className="pt-3">
-              <label>VisitedLocation</label>
+              <label>Local</label>
               <TagInput tag={tag} setTag={setTag} />
             </div>
           </div>

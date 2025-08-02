@@ -170,6 +170,7 @@ const Home = () => {
       >
         <div className="w-full overflow-x-hidden">
           <AddEditTravel
+            momentInfo={openViewModal.data}
             type={openEditModal.type}
             onClose={() => {
               setOpenEditModal({ isShow: false, data: null, type: 'add' })
